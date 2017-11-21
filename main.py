@@ -1,6 +1,7 @@
 #!/bin/python
 
 import imgkit
+import pdfkit
 from tdi import html as _html
 from tdi.tools import html as _html_tools
 
@@ -33,7 +34,7 @@ class Model(object):
 	node.repeat(self.repeat_template, fruits, len(fruits) - 2)
 	
     def repeat_template(self, node, fruit, last_sep_idx):
-	print dir(node.badge.name)
+	node.badge.name.content=fruit
 	
 
 
@@ -41,13 +42,17 @@ class Model(object):
 tpl = _html.from_files(['layout.html', 'badge.html'])
 print dir(tpl)
 m = tpl.render_string(Model())
-#print m
+print m
 with open('tmp.html', 'w') as f:
 	f.write(m)
 
 options = {
-	'width' : '0'
+#	'format': 'png'
+#	'width' : '0'
 }
 #print m
-imgkit.from_file('tmp.html', 'out.jpg', options=options)
+#imgkit.from_file('tmp.html', 'out.jpg', options=options)
+pdfkit.from_file('tmp.html', 'out.pdf', options=options)
+
+
 #imgkit.from_string('Hello!', 'out.jpg')

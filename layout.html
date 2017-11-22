@@ -1,39 +1,21 @@
 <html>
 <head>    
     <style type="text/css">
-        .back{
-            top 0;
-            position: absolute;
-            z-index: -1;
-        }
-        .photo{
-            top: 80;
-            left: 30;
-            position: absolute;
-            z-index: 1;
-        }
-        .text{
-            z-index: 1;
-            top: 60;
-            left: 200;
-            position: absolute;
+        .rep{
+            display: inline-block;
+            margin: 1;
         }
         body{
-/*            width: 500px;*/
             margin: 0;
             padding: 0;
         }
-        .badge{
-            position: relative;
-        }
-        .rep{
-            display: inline-block;
-        }
+    </style>
+    <style tdi:overlay=">style" type="text/css">
     </style>
 </head>
 <body>
-    <div class="rep" tdi="template">
-        <div tdi="badge"  tdi:overlay=">badge" class="badge">
+    <div class="rep" tdi="layout">
+        <div tdi="template"  tdi:overlay=">template">
         </div>
     </div>
 </body>

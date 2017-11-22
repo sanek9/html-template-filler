@@ -1,11 +1,7 @@
 <html>
 <head>    
-    <style type="text/css">
-        .back{
-            top 0;
-            position: absolute;
-            z-index: -1;
-        }
+    <style tdi:overlay="<style" type="text/css">
+/*
         .photo{
             top: 80;
             left: 30;
@@ -18,26 +14,76 @@
             left: 200;
             position: absolute;
         }
-        body{
-/*            width: 500px;*/
-            margin: 0;
-            padding: 0;
-        }
         .badge{
             position: relative;
         }
-        .rep{
-            display: inline-block;
+        .box{
+            position: absolute;
+        }
+*/
+        .badge{
+            position: relative;
+        }
+        .box{
+            top: 80;
+            width: 290;
+            height: 298;
+            padding: 15 15 25 15;
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+/*            align-items: flex-start;*/
+            
+        }
+        .box2{
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+        .box3{
+            
+        }
+        .name{
+/*            padding: 10 0 10 0;*/
+            height: 133;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        h2{
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+        }
+        h3{
+            text-align: center;
+            font-family: sans-serif;
+            font-weight: normal;
+            margin: 0;
+            padding: 0;
         }
     </style>
 </head>
 <body>
-    <div tdi="badge" tdi:overlay="<badge" class="badge">
-        <img tdi="photo" src="img.jpg">
-        <div class="text">
-            <h1 tdi="name">Name</h1>
+    <div tdi="template" tdi:overlay="<template" class="badge">
+        <div class="box">
+            <div class=box2>
+                <img tdi="photo" width="100" height="133" src="photo.png">
+                <div class="name">
+                    <h2 tdi="name">Name</h2>
+                    <h2 tdi="surname">SurName</h2>
+                    <h2 tdi="patronymic">Patronymic</h2>
+                </div>
+            </div>
+            <h3 tdi="post">Name</h3>
+            <h3 tdi="department">Department</h3>
         </div>
-        <img tdi="photo" width="100" class="photo" src=photo.png>
+        <img tdi="photo" width="320" height="418" class="photo" src=img.png>
     </div>
 </body>
 </html>

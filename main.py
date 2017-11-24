@@ -13,12 +13,23 @@ class TermUI(object):
         
         
         self._run = True
+        self._help = [
+                ("s" , "Search in database"),
+                ("t" , "Adds to the list by personal numbers"),
+                ("p" , "Prints the list"),
+                ("d" , "Removes from list"),
+                ("m" , "Makes badges"),
+                ("q" , "Quit"),
+                ("h" , "Prints this help")
+            ]
         self.comm = {
                 "s" : self.select,
-                "a" : self.append,
-                "e" : self.exit,
+                "t" : self.append,
+                "q" : self.quit,
+                "d" : self.delete,
                 "p" : self.print_list,
-                "m" : self.make
+                "m" : self.make,
+                "h" : self.help
             }
         self.persons = {}
         
@@ -49,8 +60,8 @@ class TermUI(object):
         try:
             conn = self.get_connection();
 
-            line = raw_input("find:> ")
-            tmp = self._fetch_persons(conn, "(s.Family like {0}) or (s.Imya like {0}) or (s.Otch like {0});".format("'%"+line+"%'"))
+            line = raw_input(u"search:> ")
+            tmp = self._fetch_persons(conn, u"(s.Family like {0}) or (s.Imya like {0}) or (s.Otch like {0});".format("'%"+line+"%'"))
             
             self._print_persons(tmp)
             if(tmp):
@@ -64,13 +75,13 @@ class TermUI(object):
     def _print_persons(self, persons):
         if(persons):
             for tab, person in persons.items():
-                print(u"|{:>4}|{:>20}|{:>20}|{:>20}|{:>60}|{:>60}|".format(person['tab'], person['name'], person['surname'], person['patronymic'], person['post'], person['department']))
+                print(u"|{:>4}|{:>20}|{:>20}|{:>20}|{:>70}|{:>70}|".format(person['tab'], person['name'], person['surname'], person['patronymic'], person['post'], person['department']))
         else:
-            print("List is empty")
+            print(u"List is empty")
             
     def _fetch_persons(self, conn, where):
         cursor = conn.cursor()
-        cursor.execute("SELECT s.Cod_sostav, s.N_Tab, s.Family, s.Imya, s.Otch, d.Name_dolg, o.Name_otdel \
+        cursor.execute(u"SELECT s.Cod_sostav, s.N_Tab, s.Family, s.Imya, s.Otch, d.Name_dolg, o.Name_otdel \
             FROM Tsostav s\
             left join Spr_dolg d on s.Cod_dolg = d.Cod_dolg\
             left join Spr_otdel o on s.Cod_otdel = o.Cod_otdel\
@@ -96,27 +107,51 @@ class TermUI(object):
                 
     def append(self):
         self._add_to_list()
+    def delete(self):
+        line = raw_input(u"delete tabs:> ")
+        if(line is u"all"):
+            line = raw_input (u"Are you sure? [y/N]:")
+            if(line is u"y"):
+                self.persons = []
+            return
+        
+        tabs = line.split(' ')
+        tmp = {}
+        for tab in tabs:
+            if(tab in self.persons):
+                tmp[tab]=self.persons[tab]
+        
+        self._print_persons(tmp)
+        line = raw_input ("They are will be deleted, continue? [y/N]:")
+        if(line is u"y"):
+            for key, val in tmp.items():
+               del self.persons[key]
+
     def _add_to_list(self, tmp={}):
         
         f = True
         
+        persons_len = len(self.persons)
         
-        
-        line = raw_input("tabs:> ")
-        
+        line = raw_input(u"tabs:> ")
+        if(not line is u"all"):
+            tabs = [x for x in line.split(' ') if len(x)==4]
+            
+        else:
+            tabs = tmp.keys()
         ntmp = []
-        for tab in line.split(' '):
+        for tab in tabs:
             if(tab in tmp):
                 self.persons[tab] = tmp[tab]
             else:
                 ntmp.append(tab)
-    
+        
         if(ntmp):
             
-            print("Load from database...")
+            print(u"Load from database...")
             try:
                 conn = self.get_connection();
-                p = self._fetch_persons(conn, "s.N_Tab in ({})".format(", ".join(ntmp)))
+                p = self._fetch_persons(conn, u"s.N_Tab in ({})".format(", ".join([ str(n) for n in ntmp])))
                 self.persons.update(p)
             except Error as e:
                 print(e)
@@ -124,7 +159,7 @@ class TermUI(object):
             finally:
                 conn.close()
         
-        print("ok")
+        print(u"{} items added. Total: {}".format(len(self.persons) - persons_len, persons_len))
         
     def _save_photo(self, conn, persons):
         cursor = conn.cursor()
@@ -132,7 +167,7 @@ class TermUI(object):
         print(persons.keys())
         for n in persons.keys():
             print n
-        query = "select s.N_Tab, f.Foto from Tsostav s \
+        query = u"select s.N_Tab, f.Foto from Tsostav s \
         left join Tfoto f on s.Cod_sostav = f.Cod_sostav\
         where s.N_Tab in ({})".format( ', '.join(persons.keys()))
         print (query)
@@ -151,16 +186,22 @@ class TermUI(object):
         
         self._print_persons(self.persons)
         
-    def exit(self):
+    def quit(self):
         self._run = False
     
     def run(self):
+        self.help()
         while self._run:
             line = raw_input(":> ")
             try:
                 self.comm[line]()
             except KeyError as e:
-                print ('Undefined unit: {}'.format(e.args[0]))
+                print (u'Undefined unit: {}'.format(e.args[0]))
+                self.help()
+    def help(self):
+        print(u"Help:")
+        for k, v in self._help:
+            print(u"{:>10}     {}".format(k,v))
 
 ui = TermUI()
 ui.run()

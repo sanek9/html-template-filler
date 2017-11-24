@@ -109,10 +109,10 @@ class TermUI(object):
         self._add_to_list()
     def delete(self):
         line = raw_input(u"delete tabs:> ")
-        if(line is u"all"):
+        if(line == u"all"):
             line = raw_input (u"Are you sure? [y/N]:")
-            if(line is u"y"):
-                self.persons = []
+            if(line == u"y"):
+                self.persons = {}
             return
         
         tabs = line.split(' ')
@@ -123,7 +123,7 @@ class TermUI(object):
         
         self._print_persons(tmp)
         line = raw_input ("They are will be deleted, continue? [y/N]:")
-        if(line is u"y"):
+        if(line == u"y"):
             for key, val in tmp.items():
                del self.persons[key]
 
@@ -134,7 +134,7 @@ class TermUI(object):
         persons_len = len(self.persons)
         
         line = raw_input(u"tabs:> ")
-        if(not line is u"all"):
+        if(not (line == u"all")):
             tabs = [x for x in line.split(' ') if len(x)==4]
             
         else:
@@ -159,7 +159,7 @@ class TermUI(object):
             finally:
                 conn.close()
         
-        print(u"{} items added. Total: {}".format(len(self.persons) - persons_len, persons_len))
+        print(u"{} items added. Total: {}".format(len(self.persons) - persons_len, len(self.persons)))
         
     def _save_photo(self, conn, persons):
         cursor = conn.cursor()

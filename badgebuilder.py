@@ -38,7 +38,7 @@ class BadgeBuilder(object):
         node.patronymic.content = person['patronymic']
         node.post.content = person['post']
         node.department.content = person['department']
-        print(person['photo'])
+ #       print(person['photo'])
         node.photo['src'] = person['photo']
     
     def make(self, persons, out):

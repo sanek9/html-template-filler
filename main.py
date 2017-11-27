@@ -60,8 +60,9 @@ class TermUI(object):
         try:
             conn = self.get_connection();
 
-            line = raw_input(u"search:> ")
-            tmp = self._fetch_persons(conn, u"(s.Family like {0}) or (s.Imya like {0}) or (s.Otch like {0});".format("'%"+line+"%'"))
+            line = raw_input(u"search:> ").decode('utf-8')
+            
+            tmp = self._fetch_persons(conn, u"(s.Family like {0}) or (s.Imya like {0}) or (s.Otch like {0});".format(u"'%{}%'".format(line)))
             
             self._print_persons(tmp)
             if(tmp):
@@ -85,7 +86,7 @@ class TermUI(object):
             FROM Tsostav s\
             left join Spr_dolg d on s.Cod_dolg = d.Cod_dolg\
             left join Spr_otdel o on s.Cod_otdel = o.Cod_otdel\
-            where {};".format(where))
+            where  (s.Priz_uvol <> 'U') and {} ;".format(where))
             
         row = cursor.fetchone()
         tmp = {}
@@ -108,9 +109,9 @@ class TermUI(object):
     def append(self):
         self._add_to_list()
     def delete(self):
-        line = raw_input(u"delete tabs:> ")
+        line = raw_input(u"delete tabs:> ").decode('utf-8')
         if(line == u"all"):
-            line = raw_input (u"Are you sure? [y/N]:")
+            line = raw_input (u"Are you sure? [y/N]:").decode('utf-8')
             if(line == u"y"):
                 self.persons = {}
             return
@@ -122,7 +123,7 @@ class TermUI(object):
                 tmp[tab]=self.persons[tab]
         
         self._print_persons(tmp)
-        line = raw_input ("They are will be deleted, continue? [y/N]:")
+        line = raw_input ("They are will be deleted, continue? [y/N]:").decode('utf-8')
         if(line == u"y"):
             for key, val in tmp.items():
                del self.persons[key]
@@ -133,7 +134,7 @@ class TermUI(object):
         
         persons_len = len(self.persons)
         
-        line = raw_input(u"tabs:> ")
+        line = raw_input(u"tabs:> ").decode('utf-8')
         if(not (line == u"all")):
             tabs = [x for x in line.split(' ') if len(x)==4]
             
@@ -163,24 +164,39 @@ class TermUI(object):
         
     def _save_photo(self, conn, persons):
         cursor = conn.cursor()
-        print(persons)
-        print(persons.keys())
-        for n in persons.keys():
-            print n
+#        print(persons)
+#        print(persons.keys())
+#        for n in persons.keys():
+#            print n
+
+#        query = u"select s.N_Tab, f.Foto from Tsostav s \
+#        left join Tfoto f on s.Cod_sostav = f.Cod_sostav\
+#        where (s.Priz_uvol <> 'U') and s.N_Tab in ({})".format( ', '.join([u"'{}'".format(x) for x in persons.keys()]))
+
         query = u"select s.N_Tab, f.Foto from Tsostav s \
         left join Tfoto f on s.Cod_sostav = f.Cod_sostav\
-        where s.N_Tab in ({})".format( ', '.join(persons.keys()))
+        where s.Cod_sostav in ({})".format( ', '.join([u"'{}'".format(x['Cod_sostav']) for k, x in persons.items()]))
+        
         print (query)
         cursor.execute(query)
         row = cursor.fetchone()
+        warn = {}
         while row is not None:
-            path = os.path.join(PHOTO_PATH, row[0]+".jpg")
+ #           print ("row "+row[0])
+            path = os.path.join(PHOTO_PATH, u"{}.jpg".format(row[0]))
 #            print("path "+path)
-            with open(path, 'wb') as f:
-                f.write(row[1])
+            if not(row[1] is None):
+                with open(path, 'wb') as f:
+                    f.write(row[1])
 #            print ("row0 "+ row[0])
-            persons[row[0]]['photo'] = path
+                persons[row[0]]['photo'] = path
+            else:
+                persons[row[0]]['photo'] = None
+                warn[row[0]]=persons[row[0]]
             row = cursor.fetchone()
+        if warn:
+            print("Warning: They don't have photos");
+            self._print_persons(warn)
             
     def print_list(self):
         
@@ -192,7 +208,7 @@ class TermUI(object):
     def run(self):
         self.help()
         while self._run:
-            line = raw_input(":> ")
+            line = raw_input(":> ").decode('utf-8')
             try:
                 self.comm[line]()
             except KeyError as e:

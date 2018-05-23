@@ -17,6 +17,7 @@ class TermUI(object):
                 ("s" , "Search in database"),
                 ("t" , "Adds to the list by personal numbers"),
                 ("p" , "Prints the list"),
+                ("ps" , "Prints the services"),
                 ("d" , "Removes from list"),
                 ("m" , "Makes badges"),
                 ("q" , "Quit"),
@@ -28,6 +29,7 @@ class TermUI(object):
                 "q" : self.quit,
                 "d" : self.delete,
                 "p" : self.print_list,
+                "ps" : self.print_services,
                 "m" : self.make,
                 "h" : self.help
             }
@@ -62,7 +64,7 @@ class TermUI(object):
 
             line = raw_input(u"search:> ").decode('utf-8')
             
-            tmp = self._fetch_persons(conn, u"(s.Family like {0}) or (s.Imya like {0}) or (s.Otch like {0});".format(u"'%{}%'".format(line)))
+            tmp = self._fetch_persons(conn, u"(s.Family like {0}) or (s.Imya like {0}) or (s.Otch like {0}) or (o.Cod_otdel={1});".format(u"'%{}%'".format(line), line))
             
             self._print_persons(tmp)
             if(tmp):
@@ -201,6 +203,25 @@ class TermUI(object):
     def print_list(self):
         
         self._print_persons(self.persons)
+        
+    def print_services(self):
+        try:
+            conn = self.get_connection();
+            
+            cursor = conn.cursor()
+            cursor.execute(u"SELECT o.Cod_otdel, o.Name_otdel \
+                FROM Spr_otdel o ORDER BY o.Name_otdel;")
+                
+            row = cursor.fetchone()
+            tmp = {}
+            while row is not None:
+                print(u"|{:>4}|{:<150}|".format(row[0], row[1]))
+                row = cursor.fetchone()
+        except Error as e:
+            print(e)
+
+        finally:
+            conn.close()
         
     def quit(self):
         self._run = False
